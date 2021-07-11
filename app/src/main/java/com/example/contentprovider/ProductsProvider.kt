@@ -6,6 +6,7 @@ import android.content.UriMatcher
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.net.Uri
+import android.util.Log
 
 class ProductsProvider : ContentProvider() {
 
@@ -107,11 +108,52 @@ class ProductsProvider : ContentProvider() {
     }
 
     override fun insert(uri: Uri, values: ContentValues?): Uri? {
-        TODO("Not yet implemented")
+
+        Log.e("tag", "insert method called ${uri.toString()}")
+
+        when (uriMatcher.match(uri)) {
+            1 -> {
+                var rowNum = db.insert(
+                    "products",
+                    null,
+                    values
+                )
+
+                Log.e("tag", "rownum is $rowNum")
+
+                if (rowNum == -1L) {
+                    return null
+                }
+
+                return Uri.withAppendedPath(
+                    uri,
+                    "${values?.getAsInteger("id")}"
+                )
+            }
+        }
+
+        return null
     }
 
     override fun delete(uri: Uri, selection: String?, selectionArgs: Array<out String>?): Int {
-        TODO("Not yet implemented")
+        when (uriMatcher.match(uri)) {
+            1 -> {
+                return db.delete(
+                    "products",
+                    null,
+                    null
+                )
+            }
+
+            2 -> {
+                return db.delete(
+                    "products",
+                    "id = ?",
+                    arrayOf("${uri.pathSegments.get(1)}")
+                )
+            }
+        }
+        return 0
     }
 
     override fun update(
@@ -120,7 +162,27 @@ class ProductsProvider : ContentProvider() {
         selection: String?,
         selectionArgs: Array<out String>?
     ): Int {
-        TODO("Not yet implemented")
+
+        when (uriMatcher.match(uri)) {
+            1 -> {
+                return db.update(
+                    "products",
+                    values,
+                    null,
+                    null
+                )
+            }
+
+            2 -> {
+                return db.update(
+                    "products",
+                    values,
+                    "id = ?",
+                    arrayOf("${uri.pathSegments.get(1)}")
+                )
+            }
+        }
+        return 0
     }
 
 
